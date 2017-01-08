@@ -37,6 +37,58 @@ setting up a binding. Some I know of are:
       (correct as of Jan 2017). Once you've signed up, there's a
       pulldown from your name that allows you to "Manage my HAN
       devices", wherein you can bind your RAVEn to the meter.
+* Jemena (Melbourne):
+    * Use their portal at https://electricityoutlook.jemena.com.au/ to
+      bind your USB device
+* AusNet Services:
+    * unknown
+* United Energy:
+    * they have a _startlingly similar_ portal to Jemena, located at
+      https://energyeasy.ue.com.au/ that you can use to set up a
+      binding
+
+## Usage
+
+There's a simple CLI, used to assist in the development of the library
+itself. Once your USB stick is set up and bound to your meter, you
+can use the CLI to monitor the current instantaneous demand reported
+by your meter:
+
+```shell
+localhost$ raven monitor
+2017-01-08T12:19:19+11:00 Instantaneous 1.915
+2017-01-08T12:19:27+11:00 Instantaneous 1.893
+2017-01-08T12:19:35+11:00 Summation 44502.369 0.0
+2017-01-08T12:19:43+11:00 Instantaneous 1.721
+```
+
+and so on.
+
+Instantaneous readings show the current demand, and the summation
+includes power delivered to the grid (eg from a PV array).
+
+The frequency of different types of data delivery are set
+by the schedule in the USB stick. By default, they are:
+
+* Instantaneous demand: 8 seconds
+* Summation: 240 seconds
+* Profile data: disabled
+* Scheduled prices: 90 seconds
+* Price: 90 seconds
+* Messages: 120 seconds
+* Time: 900 seconds (reports the current time known to the meter)
+
+However, the meter I have has no pricing data (this seems to be common
+in Australia, because wholesalers and retailers are different
+entities, and the retailer applies the pricing based on their own
+peculiar calculations from the raw consumption data) and so the price
+elements are never emitted.
+
+Similarly, if there are no messages to be consumed, the RAVEn will not
+emit a message element.
+
+In practice, this means that you'll usually only get the instantaneous
+demand and summation outputs.
 
 ## Documentation
 
