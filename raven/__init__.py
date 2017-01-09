@@ -11,8 +11,9 @@ def main():
 
     raven = Raven()
     print raven.get_connection_status()
+    print raven.get_summation_delivered()
 
-    limit = 30
+    limit = 1000
     while limit > 0:
         print raven.get_instantaneous_demand()
         limit -= 1

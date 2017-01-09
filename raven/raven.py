@@ -38,6 +38,8 @@ class Raven(object):
         self.in_fragment = False
         self.serial_ready = False
         self.connection_status = {}
+        self.instantaneous_demand = {}
+        self.summation_delivered = {}
         self.port = port
         self.read_thread = threading.Thread(target=self.read_port)
         ## so it'll get shut down if the main thread exits
@@ -82,6 +84,22 @@ class Raven(object):
 
         raise Exception("get_instantaneous_demand timeout")
 
+    def get_summation_delivered(self, timeout=DEFAULT_TIMEOUT):
+        if not self.serial_ready:
+            raise Exception("Cannot get summation delivered, serial not ready")
+
+        self.summation_delivered_fresh = False
+        self.command("get_current_summation_delivered")
+
+        remaining = float(timeout)
+        while remaining > 0:
+            if self.summation_delivered_fresh:
+                return self.summation_delivered
+            time.sleep(0.1)
+            remaining -= 0.1
+
+        raise Exception("get_summation_delivered timeout")
+
     # Handlers for the different kind of return messages.
     def connection_status_handler(self, fragment):
         status = fragment.find('Status').text
@@ -123,13 +141,35 @@ class Raven(object):
             'raw_demand': raw_demand,
             'multiplier': multiplier,
             'divisor':    divisor,
-            'timestamp':  tstamp.isoformat(),
+            'timestamp':  tstamp.isoformat() + 'Z',
         }
 
         self.instantaneous_demand_fresh = True
 
     def summation_handler(self, fragment):
-        pass
+        tstamp = convert_timestamp(int(fragment.find('TimeStamp').text, 16))
+        s_delivered = int(fragment.find('SummationDelivered').text, 16)
+        s_received = int(fragment.find('SummationReceived').text, 16)
+        multiplier = int(fragment.find('Multiplier').text, 16)
+        divisor = int(fragment.find('Divisor').text, 16)
+
+        if 0 == divisor:
+            divisor = 1
+
+        if 0 == multiplier:
+            multiplier = 1
+
+        self.summation_delivered = {
+            'raw_summation_delivered': s_delivered,
+            'raw_summation_received':  s_received,
+            'summation_delivered':     float(s_delivered) * multiplier / divisor,
+            'summation_received':      float(s_received) * multiplier / divisor,
+            'multiplier':              multiplier,
+            'divisor':                 divisor,
+            'timstamp':                tstamp.isoformat() + 'Z',
+        }
+
+        self.summation_delivered_fresh = True
 
     def is_opening_element(self, line):
         for elem in INTERESTING_ELEMENTS:
@@ -146,7 +186,6 @@ class Raven(object):
         return False
 
     def handle_fragment(self):
-        # print "Got a fragment:\n%s" % self.fragment
         root = ET.fromstring(self.fragment)
 
         if root.tag == "ConnectionStatus":
