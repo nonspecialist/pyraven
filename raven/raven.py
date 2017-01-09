@@ -3,12 +3,30 @@
 import serial
 import threading
 import xml.etree.ElementTree as ET
+import time
+import datetime
 
 INTERESTING_ELEMENTS = [
     "InstantaneousDemand",
     "CurrentSummationDelivered",
     "ConnectionStatus",
 ]
+
+# get_* interrogations of the USB device will time out after this many seconds
+# if the device doesn't return
+DEFAULT_TIMEOUT = 30
+
+
+def convert_timestamp(tstamp):
+    """ Convert a timestamp from the RAVEn format to a datetime object
+        The timestamp is actually an offset in seconds from
+        midnight on 1-Jan-2000 UTC """
+
+    # This is the number of seconds (epoch seconds) between 1-Jan-1970 and
+    # 1-Jan-2000
+    OFFSET = 946645200
+
+    return datetime.datetime.fromtimestamp(OFFSET + tstamp)
 
 class Raven(object):
     """ Represents a USB stick """
@@ -32,15 +50,42 @@ class Raven(object):
         self.serial_ready = True
         self.command('initialize')
 
-    def check_connection_status(self):
+    def get_connection_status(self, timeout=DEFAULT_TIMEOUT):
         if not self.serial_ready:
             raise Exception("Cannot check connection status, serial not ready")
 
+        self.connection_status_fresh = False
         self.command("get_connection_status")
+
+        remaining = float(timeout)
+        while remaining > 0:
+            if self.connection_status_fresh:
+                return self.connection_status
+            time.sleep(0.1)
+            remaining -= 0.1
+
+        raise Exception("get_connection_status timeout")
+
+    def get_instantaneous_demand(self, timeout=DEFAULT_TIMEOUT):
+        if not self.serial_ready:
+            raise Exception("Cannot get instantaneous demand, serial not ready")
+
+        self.instantaneous_demand_fresh = False
+        self.command("get_connection_status")
+
+        remaining = float(timeout)
+        while remaining > 0:
+            if self.instantaneous_demand_fresh:
+                return self.instantaneous_demand
+            time.sleep(0.1)
+            remaining -= 0.1
+
+        raise Exception("get_instantaneous_demand timeout")
 
     # Handlers for the different kind of return messages.
     def connection_status_handler(self, fragment):
         status = fragment.find('Status').text
+
         if "Connected" == status:
             self.connection_status = {
                 'is_connected':  True,
@@ -49,17 +94,39 @@ class Raven(object):
                 'description':   fragment.find('Description').text,
                 'extpanid':      int(fragment.find('ExtPanId').text, 16),
                 'shortaddr':     fragment.find('ShortAddr').text,
+                'status':        status,
             }
-            return
-
-        if "Fail" in status:
+        elif "Fail" in status:
             self.connection_status = {
                 'is_connected': False,
-                'description':  status
+                'description':  status,
+                'status':        status,
+            }
+        else:
+            self.connection_status = {
+                'is_connected': False,
+                'description':  fragment.find('Description').text,
+                'status':        status,
             }
 
+        self.connection_status_fresh = True
+
     def instantaneous_demand_handler(self, fragment):
-        pass
+        raw_demand = int(fragment.find('Demand').text, 16)
+        multiplier = int(fragment.find('Multiplier').text, 16)
+        divisor = int(fragment.find('Divisor').text, 16)
+        tstamp = convert_timestamp(int(fragment.find('TimeStamp').text, 16))
+        demand = float(raw_demand) * multiplier / divisor
+
+        self.instantaneous_demand = {
+            'demand':     demand,
+            'raw_demand': raw_demand,
+            'multiplier': multiplier,
+            'divisor':    divisor,
+            'timestamp':  tstamp.isoformat(),
+        }
+
+        self.instantaneous_demand_fresh = True
 
     def summation_handler(self, fragment):
         pass
@@ -79,7 +146,7 @@ class Raven(object):
         return False
 
     def handle_fragment(self):
-        print "Got a fragment:\n%s" % self.fragment
+        # print "Got a fragment:\n%s" % self.fragment
         root = ET.fromstring(self.fragment)
 
         if root.tag == "ConnectionStatus":

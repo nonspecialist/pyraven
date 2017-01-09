@@ -10,9 +10,12 @@ def main():
     args = parser.parse_args()
 
     raven = Raven()
-    time.sleep(1)
-    raven.command('get_connection_status')
-    time.sleep(100)
+    print raven.get_connection_status()
+
+    limit = 30
+    while limit > 0:
+        print raven.get_instantaneous_demand()
+        limit -= 1
 
 if __name__ == "__main__":
     main()
