@@ -16,7 +16,6 @@ INTERESTING_ELEMENTS = [
 # if the device doesn't return
 DEFAULT_TIMEOUT = 30
 
-
 def convert_timestamp(tstamp):
     """ Convert a timestamp from the RAVEn format to a datetime object
         The timestamp is actually an offset in seconds from
@@ -28,8 +27,19 @@ def convert_timestamp(tstamp):
 
     return datetime.datetime.fromtimestamp(OFFSET + tstamp)
 
+def hex_to_int(string):
+    try:
+        result = int(string, 16)
+    except:
+        result = 0
+
+    return result
+
 class Raven(object):
     """ Represents a USB stick """
+
+    """ Event types """
+    EventNone, EventConnectionStatus, EventInstantaneousDemand, EventSummationDelivered = range(4)
 
     def __init__(self, port='/dev/ttyUSB0'):
         if port is None:
@@ -44,6 +54,7 @@ class Raven(object):
         self.read_thread = threading.Thread(target=self.read_port)
         ## so it'll get shut down if the main thread exits
         self.read_thread.daemon = True
+        self.event = self.EventNone
         self.open_and_init()
 
     def open_and_init(self):
@@ -73,7 +84,7 @@ class Raven(object):
             raise Exception("Cannot get instantaneous demand, serial not ready")
 
         self.instantaneous_demand_fresh = False
-        self.command("get_connection_status")
+        self.command("get_instantaneous_demand")
 
         remaining = float(timeout)
         while remaining > 0:
@@ -123,18 +134,19 @@ class Raven(object):
         else:
             self.connection_status = {
                 'is_connected': False,
-                'description':  fragment.find('Description').text,
                 'status':        status,
             }
 
         self.connection_status_fresh = True
+        self.event = self.EventConnectionStatus
 
     def instantaneous_demand_handler(self, fragment):
-        raw_demand = int(fragment.find('Demand').text, 16)
-        multiplier = int(fragment.find('Multiplier').text, 16)
-        divisor = int(fragment.find('Divisor').text, 16)
-        tstamp = convert_timestamp(int(fragment.find('TimeStamp').text, 16))
+        raw_demand = hex_to_int(fragment.find('Demand').text)
+        multiplier = hex_to_int(fragment.find('Multiplier').text)
+
+        divisor = hex_to_int(fragment.find('Divisor').text)
         demand = float(raw_demand) * multiplier / divisor
+        tstamp = convert_timestamp(hex_to_int(fragment.find('TimeStamp').text))
 
         self.instantaneous_demand = {
             'demand':     demand,
@@ -145,13 +157,18 @@ class Raven(object):
         }
 
         self.instantaneous_demand_fresh = True
+        self.event = self.EventInstantaneousDemand
 
     def summation_handler(self, fragment):
-        tstamp = convert_timestamp(int(fragment.find('TimeStamp').text, 16))
-        s_delivered = int(fragment.find('SummationDelivered').text, 16)
-        s_received = int(fragment.find('SummationReceived').text, 16)
-        multiplier = int(fragment.find('Multiplier').text, 16)
-        divisor = int(fragment.find('Divisor').text, 16)
+        try:
+            tstamp = convert_timestamp(hex_to_int(fragment.find('TimeStamp').text))
+        except:
+            tstamp = convert_timestamp(0)
+
+        s_delivered = hex_to_int(fragment.find('SummationDelivered').text)
+        s_received = hex_to_int(fragment.find('SummationReceived').text)
+        multiplier = hex_to_int(fragment.find('Multiplier').text)
+        divisor = hex_to_int(fragment.find('Divisor').text)
 
         if 0 == divisor:
             divisor = 1
@@ -170,6 +187,7 @@ class Raven(object):
         }
 
         self.summation_delivered_fresh = True
+        self.event = self.EventSummationDelivered
 
     def is_opening_element(self, line):
         for elem in INTERESTING_ELEMENTS:
@@ -218,4 +236,20 @@ class Raven(object):
         """ Create a 'Command' element and send it to the device """
         cmd = "<Command><Name>%s</Name></Command>\n" % command
         self.ser.write(cmd)
+
+    def long_poll_result(self):
+        """ Block until we get an event then return the event object """
+
+        while self.event == self.EventNone:
+            time.sleep(0.1)
+
+        if self.event == self.EventConnectionStatus:
+            res = self.connection_status
+        elif self.event == self.EventInstantaneousDemand:
+            res = self.instantaneous_demand
+        elif self.event == self.EventSummationDelivered:
+            res = self.summation_delivered
+
+        self.event = self.EventNone
+        return res
 

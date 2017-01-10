@@ -13,9 +13,11 @@ def main():
     print raven.get_connection_status()
     print raven.get_summation_delivered()
 
+    # just wait for a while, because the scheduler inside the stick delivers
+    # instantaneous demand automatically
     limit = 1000
     while limit > 0:
-        print raven.get_instantaneous_demand()
+        print raven.long_poll_result()
         limit -= 1
 
 if __name__ == "__main__":
