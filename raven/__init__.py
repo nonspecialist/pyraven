@@ -7,9 +7,10 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(prog="raven", description="Interrogate the RAVEn USB IHD")
+    parser.add_argument('--port', '-p', help='Serial port of the USB stick [/dev/ttyUSB0]', default="/dev/ttyUSB0")
     args = parser.parse_args()
 
-    raven = Raven()
+    raven = Raven(vars(args)['port'])
     print raven.get_connection_status()
     print raven.get_summation_delivered()
 
