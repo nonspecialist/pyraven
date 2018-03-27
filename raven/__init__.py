@@ -11,6 +11,9 @@ def main():
     parser.add_argument('--port', '-p',
                         help='Serial port of the USB stick [/dev/ttyUSB0]',
                         default="/dev/ttyUSB0")
+    parser.add_argument('--limit', '-l',
+                        help='Count of events to consume before stopping [1000]',
+                        default=1000)
     parser.add_argument('--version', '-V',
                         action='version',
                         version='%(prog)s {version}'.format(version=_version.__version__))
@@ -22,10 +25,11 @@ def main():
 
     # just wait for a while, because the scheduler inside the stick delivers
     # instantaneous demand automatically
-    limit = 1000
-    while limit > 0:
+    limit = int(vars(args)['limit']) or -1
+    while limit < 0 or limit > 0:
         print(raven_usb.long_poll_result())
-        limit -= 1
+        if limit > 0:
+            limit -= 1
 
 
 if __name__ == "__main__":
