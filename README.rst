@@ -1,6 +1,16 @@
 PyRAVEn
 =======
 
+|travis-badge| |pypi-badge|
+
+.. |travis-badge| image:: https://img.shields.io/travis/nonspecialist/pyraven.svg
+   :target: https://travis-ci.org/nonspecialist/pyraven
+   :alt: Travis build badge for pyraven
+
+.. |pypi-badge| image:: https://img.shields.io/pypi/v/pyraven.svg
+   :target: https://pipy.python.org/pypi/pyraven
+   :alt: PyPI version badge
+
 Some code to talk to the Rainforest Automation "Radio Adapter for Viewing
 Energy" (RAVEn).
 
