@@ -11,7 +11,7 @@ install:
 
 script:
   - env
-  - tox
+  - tox -e py$( echo $TRAVIS_PYTHON_VERSION | tr -d . )
 
 jobs:
   include:
