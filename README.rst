@@ -73,11 +73,13 @@ can use the CLI to monitor the current instantaneous demand reported
 by your meter:
 
 .. code:: shell
-        localhost$ raven monitor
-        2017-01-08T12:19:19+11:00 Instantaneous 1.915
-        2017-01-08T12:19:27+11:00 Instantaneous 1.893
-        2017-01-08T12:19:35+11:00 Summation 44502.369 0.0
-        2017-01-08T12:19:43+11:00 Instantaneous 1.721
+
+    localhost$ raven
+    {'status': 'Connected', 'shortaddr': '0xd131', 'link_strength': 100, 'extpanid': 1234567890123456L, 'is_connected': True, 'channel': 11, 'description': 'Successfully Joined'}
+    {'divisor': 1000, 'summation_delivered': 2220.575, 'raw_summation_received': 0, 'timstamp': '2018-03-27T02:45:45Z', 'raw_summation_delivered': 2220575, 'multiplier': 1, 'summation_received': 0.0}
+    {'divisor': 1000, 'summation_delivered': 2220.575, 'raw_summation_received': 0, 'timstamp': '2018-03-27T02:45:45Z', 'raw_summation_delivered': 2220575, 'multiplier': 1, 'summation_received': 0.0}
+    {'timestamp': '2018-03-27T02:47:56Z', 'raw_demand': 142, 'multiplier': 1, 'divisor': 1000, 'demand': 0.142}
+    ...
 
 and so on.
 
