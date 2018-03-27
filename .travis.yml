@@ -1,8 +1,8 @@
 language: python
 python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
+  - '2.7'
+  - '3.5'
+  - '3.6'
 
 install:
   - pip install .
@@ -22,7 +22,6 @@ jobs:
         provider: pypi
         username: nonspecialist
         password:
-          secure: kkbjBg1MwRhyPPabNQcYreTsFexf+1/5W4soO6MWslgPQDsB3h63QfTOV5OvBFAJdBDjPFcrG8raH4JL6oebadVbl/gTYeNCpu7iSbudlSnHTgm4G84o2IOrnFDrEE7iTxkzasPAkmdhBde6ZLIbJFKJ5x5c4LQeHZZSPvYftN043Sv4yta/xeQ84iHsRGVZ/8ugXtmaiZX1rbjqpUqXe/WlR7z3O48KBFSEagZZA93fQdCQEC25SJ5J5P+WgrWyNncK8zaIl5O0k5VzfjSXrwzUl+GTA4SFkqPqj66tqJzgHIl7Ggu5D2kEY2U2+JDYaQz5bcv+WwlkE/De4DicwMoLL7Mjn2MnL2W6uSAtrkX8VoebzbSnmC4/JFC4FiPvPFiBVeO5uupsijoU7UXhYjEvLv/L0tRRo2F3PIzFTRq34KvuT60dfbnagRxp764jiXwRj9gDqbjGXqPIEf2itllOd+aur2YTjVBMQ6Nv5+C0P1wiqlHcNeeg8OY7t6e9WQHbe6iqb2ZhTQ9AgA5MEmVQRWzTD3joqY536kNcIWrbwlQ06+JhbcXlgozPwX4MiSYKtxXMXsom29wiWMzL3MJTIUOsOBe/eOWCBolYEl0Km5zr5C0gXyKZ3+4kXaG5tyGa+wjSuCXz4D01DRoK9wXDSxi+ZpHM5RYdxcAO3uY=
+          secure: IYt07ycigFijeDIuxojx+TIXSuqeRkHktUi7tBcIlHv7qs3YwiZYnpzKvdw/iTlq4wJduWA64Aad6hWlMptCC//jRiqmXE+LHCcS9jTqwhOOZAT+PrWkOnqkrpImhW1P9+LM5Sm6G0WNh7bukiQadgWoXpvdU/OSMJtAOU0pPecVSdM/73CoxjiRSkO+HDfSNjkCOVahGECN9vnsl0ra6ZpHcmxkKSiUha2NW2LUpDjcFF/MZzKaUeO5EEsql2CVTLu8136lHBxC+Rw0sRnQTWCsGBRyp0JzLNzCbUOwh38XSv4ybgmGaWgDct8LfNeu96qADO5nPFmIMd6+sw0nTtskAvPsrVwpmP1gr1HE77X/m+WTILkaSgmFwpQ7HX1VRDkKcNydG1Gl25KOImp4dcgsxBYgucS1R5g7RwAMaNaCUPyKOI7S+4QlXjlXhtQiVJa5ilZB75xjKULbJB5oa5d1q5ekJwyp6HuSsRO46w5fxOQcOxDW7WMMoWtHTokF+HrscltB450HcVsnFZUg+imqpZOo7oJuVXUY8e5a8smtQZTdRsnbO1cPzzgb1cIx6cCA3+MilncJAbgUmNzNjE1d7+PtEMks3Z8LOdQVDcJvRuWgLYq9+agJq4qnzsCLkDAUNHcjsbnmHkmK7fhG3/mWZ/DGnIYq5fcZ1H6Nhlk=
         on:
           tags: true
-
