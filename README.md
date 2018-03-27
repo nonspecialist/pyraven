@@ -5,7 +5,9 @@ Energy" (RAVEn).
 
 ## Installation
 
-You should be able to install this with `pip`:
+The easiest way would be `pip install pyraven`
+
+You could also install direct from this repository:
 
 1. Clone this repo
 1. In the top-level directory (where this README.md is) run
