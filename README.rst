@@ -58,7 +58,8 @@ setting up a binding. Some I know of are:
     * Use their portal at https://electricityoutlook.jemena.com.au/ to
       bind your USB device
 * AusNet Services:
-    * unknown
+    * Use the portal at https://connect.ausnetservices.com.au/webui/
+      to bind your device
 * United Energy:
     * they have a *startlingly similar* portal to Jemena, located at
       https://energyeasy.ue.com.au/ that you can use to set up a
