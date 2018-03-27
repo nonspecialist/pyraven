@@ -16,6 +16,7 @@ INTERESTING_ELEMENTS = [
 # if the device doesn't return
 DEFAULT_TIMEOUT = 30
 
+
 def convert_timestamp(tstamp):
     """ Convert a timestamp from the RAVEn format to a datetime object
         The timestamp is actually an offset in seconds from
@@ -27,13 +28,15 @@ def convert_timestamp(tstamp):
 
     return datetime.datetime.fromtimestamp(OFFSET + tstamp)
 
+
 def hex_to_int(string):
     try:
         result = int(string, 16)
-    except:
+    except Exception:
         result = 0
 
     return result
+
 
 class Raven(object):
     """ Represents a USB stick """
@@ -52,7 +55,7 @@ class Raven(object):
         self.summation_delivered = {}
         self.port = port
         self.read_thread = threading.Thread(target=self.read_port)
-        ## so it'll get shut down if the main thread exits
+        # so it'll get shut down if the main thread exits
         self.read_thread.daemon = True
         self.event = self.EventNone
         self.open_and_init()
@@ -129,12 +132,12 @@ class Raven(object):
             self.connection_status = {
                 'is_connected': False,
                 'description':  status,
-                'status':        status,
+                'status':       status,
             }
         else:
             self.connection_status = {
                 'is_connected': False,
-                'status':        status,
+                'status':       status,
             }
 
         self.connection_status_fresh = True
@@ -162,7 +165,7 @@ class Raven(object):
     def summation_handler(self, fragment):
         try:
             tstamp = convert_timestamp(hex_to_int(fragment.find('TimeStamp').text))
-        except:
+        except Exception:
             tstamp = convert_timestamp(0)
 
         s_delivered = hex_to_int(fragment.find('SummationDelivered').text)
@@ -231,7 +234,6 @@ class Raven(object):
             if self.in_fragment:
                 self.fragment += read
 
-
     def command(self, command):
         """ Create a 'Command' element and send it to the device """
         cmd = "<Command><Name>%s</Name></Command>\n" % command
@@ -252,4 +254,3 @@ class Raven(object):
 
         self.event = self.EventNone
         return res
-
