@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from raven import Raven
+from . import raven
 import argparse
 
 
@@ -12,15 +12,15 @@ def main():
                         default="/dev/ttyUSB0")
     args = parser.parse_args()
 
-    raven = Raven(vars(args)['port'])
-    print(raven.get_connection_status())
-    print(raven.get_summation_delivered())
+    raven_usb = raven.Raven(vars(args)['port'])
+    print(raven_usb.get_connection_status())
+    print(raven_usb.get_summation_delivered())
 
     # just wait for a while, because the scheduler inside the stick delivers
     # instantaneous demand automatically
     limit = 1000
     while limit > 0:
-        print(raven.long_poll_result())
+        print(raven_usb.long_poll_result())
         limit -= 1
 
 
