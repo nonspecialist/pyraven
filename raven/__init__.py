@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from . import raven
+from . import _version
 import argparse
 
 
@@ -10,6 +11,9 @@ def main():
     parser.add_argument('--port', '-p',
                         help='Serial port of the USB stick [/dev/ttyUSB0]',
                         default="/dev/ttyUSB0")
+    parser.add_argument('--version', '-V',
+                        action='version',
+                        version='%(prog)s {version}'.format(version=_version.__version__))
     args = parser.parse_args()
 
     raven_usb = raven.Raven(vars(args)['port'])

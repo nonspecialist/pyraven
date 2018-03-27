@@ -17,13 +17,17 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+version = {}
+with open(path.join(here, 'raven/_version.py')) as fp:
+    exec(fp.read(), version)
+
 setup(
     name='pyraven',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.1',
+    version=version['__version__'],
 
     description='Interface with the Rainforest Automation RAVEn USB stick',
     long_description=long_description,
