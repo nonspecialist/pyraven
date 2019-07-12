@@ -42,7 +42,7 @@ class Raven(object):
     """ Represents a USB stick """
 
     """ Event types """
-    EventNone, EventConnectionStatus, EventInstantaneousDemand, EventSummationDelivered = range(4)
+    EventNone, EventConnectionStatus, EventInstantaneousDemand, EventSummationDelivered = list(range(4))
 
     def __init__(self, port='/dev/ttyUSB0'):
         if port is None:
@@ -237,7 +237,7 @@ class Raven(object):
     def command(self, command):
         """ Create a 'Command' element and send it to the device """
         cmd = "<Command><Name>%s</Name></Command>\n" % command
-        self.ser.write(cmd)
+        self.ser.write(bytes(cmd, encoding='ascii'))
 
     def long_poll_result(self):
         """ Block until we get an event then return the event object """
