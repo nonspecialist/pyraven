@@ -198,6 +198,11 @@ class Raven(object):
 
     def instantaneous_demand_handler(self, fragment):
         raw_demand = hex_to_int(fragment.find('Demand').text)
+        # with solar the value can go negative
+        # this raw_demand is signed int, so the conversion
+        #   - Danny ter Haar Feb 2019
+        if(raw_demand & 0x80000000):
+                raw_demand = -0x100000000 + raw_demand
         multiplier = hex_to_int(fragment.find('Multiplier').text)
 
         divisor = hex_to_int(fragment.find('Divisor').text)
