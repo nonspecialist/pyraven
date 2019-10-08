@@ -38,17 +38,19 @@ def hex_to_int(string):
 
     return result
 
+
 def hex_to_mac(string):
     # strip off leading '0x'
     try:
         tmp = string[2:]
         result = ':'.join(
-                [tmp[0:2],  tmp[2:4],   tmp[4:6],   tmp[6:8],
-                tmp[8:10], tmp[10:12], tmp[12:14], tmp[14:16] ] )
-    except:
+            [tmp[0:2],  tmp[2:4],   tmp[4:6],   tmp[6:8],
+             tmp[8:10], tmp[10:12], tmp[12:14], tmp[14:16]])
+    except Exception:
         result = '00:00:00:00:00:00:00:00'
 
     return result
+
 
 class Raven(object):
     """ Represents a USB stick """
@@ -202,7 +204,7 @@ class Raven(object):
         # this raw_demand is signed int, so the conversion
         #   - Danny ter Haar Feb 2019
         if(raw_demand & 0x80000000):
-                raw_demand = -0x100000000 + raw_demand
+            raw_demand = -0x100000000 + raw_demand
         multiplier = hex_to_int(fragment.find('Multiplier').text)
 
         divisor = hex_to_int(fragment.find('Divisor').text)
