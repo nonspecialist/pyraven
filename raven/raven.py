@@ -10,6 +10,7 @@ INTERESTING_ELEMENTS = [
     "InstantaneousDemand",
     "CurrentSummationDelivered",
     "ConnectionStatus",
+    "DeviceInfo",
 ]
 
 # get_* interrogations of the USB device will time out after this many seconds
@@ -37,12 +38,23 @@ def hex_to_int(string):
 
     return result
 
+def hex_to_mac(string):
+    # strip off leading '0x'
+    try:
+        tmp = string[2:]
+        result = ':'.join(
+                [tmp[0:2],  tmp[2:4],   tmp[4:6],   tmp[6:8],
+                tmp[8:10], tmp[10:12], tmp[12:14], tmp[14:16] ] )
+    except:
+        result = '00:00:00:00:00:00:00:00'
+
+    return result
 
 class Raven(object):
     """ Represents a USB stick """
 
     """ Event types """
-    EventNone, EventConnectionStatus, EventInstantaneousDemand, EventSummationDelivered = range(4)
+    EventNone, EventConnectionStatus, EventInstantaneousDemand, EventSummationDelivered, EventDeviceInfo = range(5)
 
     def __init__(self, port='/dev/ttyUSB0'):
         if port is None:
@@ -53,6 +65,7 @@ class Raven(object):
         self.connection_status = {}
         self.instantaneous_demand = {}
         self.summation_delivered = {}
+        self.device_info = {}
         self.port = port
         self.read_thread = threading.Thread(target=self.read_port)
         # so it'll get shut down if the main thread exits
@@ -65,6 +78,30 @@ class Raven(object):
         self.read_thread.start()
         self.serial_ready = True
         self.command('initialize')
+
+    def factory_reset(self):
+        if not self.serial_ready:
+            raise Exception("Cannot get device info, serial not ready")
+
+        self.command("factory_reset")
+
+        return True
+
+    def get_device_info(self, timeout=DEFAULT_TIMEOUT):
+        if not self.serial_ready:
+            raise Exception("Cannot get device info, serial not ready")
+
+        self.device_info_fresh = False
+        self.command("get_device_info")
+
+        remaining = float(timeout)
+        while remaining > 0:
+            if self.device_info_fresh:
+                return self.device_info
+            time.sleep(0.1)
+            remaining -= 0.1
+
+        raise Exception("get_device_info timeout")
 
     def get_connection_status(self, timeout=DEFAULT_TIMEOUT):
         if not self.serial_ready:
@@ -143,6 +180,22 @@ class Raven(object):
         self.connection_status_fresh = True
         self.event = self.EventConnectionStatus
 
+    def device_info_handler(self, fragment):
+        self.device_info = {
+            'device_mac': hex_to_mac(fragment.find('DeviceMacId').text),
+            'install_code': hex_to_mac(fragment.find('InstallCode').text),
+            'link_key': fragment.find('LinkKey').text,
+            'fw_version': fragment.find('FWVersion').text,
+            'hw_version': fragment.find('HWVersion').text,
+            'image_type': fragment.find('ImageType').text,
+            'manufacturer': fragment.find('Manufacturer').text,
+            'model_id': fragment.find('ModelId').text,
+            'date_code': fragment.find('DateCode').text,
+        }
+
+        self.device_info_fresh = True
+        self.event = self.EventDeviceInfo
+
     def instantaneous_demand_handler(self, fragment):
         raw_demand = hex_to_int(fragment.find('Demand').text)
         multiplier = hex_to_int(fragment.find('Multiplier').text)
@@ -215,6 +268,8 @@ class Raven(object):
             self.instantaneous_demand_handler(root)
         elif root.tag == "CurrentSummationDelivered":
             self.summation_handler(root)
+        elif root.tag == "DeviceInfo":
+            self.device_info_handler(root)
 
     def read_port(self):
         self.in_element = False
