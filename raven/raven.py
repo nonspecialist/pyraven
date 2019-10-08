@@ -237,7 +237,7 @@ class Raven(object):
     def command(self, command):
         """ Create a 'Command' element and send it to the device """
         cmd = "<Command><Name>%s</Name></Command>\n" % command
-        self.ser.write(cmd)
+        self.ser.write(cmd.encode())
 
     def long_poll_result(self):
         """ Block until we get an event then return the event object """
