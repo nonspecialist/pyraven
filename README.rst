@@ -113,8 +113,10 @@ demand and summation outputs.
 Documentation
 -------------
 
-The XML protocol specification can be `downloaded from
+The XML protocol specification used to be be `available from
 Rainforest Automation <http://www.rainforestautomation.com/sites/default/files/download/rfa-z106/raven_xml_api_r127.pdf>`__
+but that link no longer works. I've included the version that I
+had previously downloaded under the `docs` directory
 
 Other works
 -----------
@@ -134,4 +136,3 @@ already out there.
 * `node-raven <https://github.com/stormboy/node-raven>`__
     * NodeJS
     * publishes to an MQTT server
-

@@ -2,7 +2,6 @@
 *.pyc
 *.pyo
 *.xml
-*.pdf
 build/
 dist/
 *.egg-info/
@@ -16,4 +15,3 @@ __pycache__/
 .tox
 .cache
 .pytest_cache
-
