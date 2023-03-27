@@ -64,6 +64,23 @@ setting up a binding. Some I know of are:
     * they have a *startlingly similar* portal to Jemena, located at
       https://energyeasy.ue.com.au/ that you can use to set up a
       binding
+      
+Unbinding/re-pairing to a different smart meter
+***********************************************
+
+The RAVEn needs to have a ``FACTORY_RESET`` command to sent to it, for
+it to be able to bind/pair to a different smart meter.
+
+A ``FACTORY_RESET`` can be performed using the CLI wrapper:
+
+.. code:: shell
+
+    localhost$ raven --factory_reset
+    Will not factory reset: re-run with hidden argument --yes-really
+    
+    localhost$ raven --factory-reset --yes-really
+    FACTORY RESET IN PROGRESS
+    
 
 Usage
 -----
